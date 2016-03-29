@@ -193,7 +193,7 @@ However, there are times when you want to separate some machines from the common
 
 * Some nodes in your cluster have publicly reachable network addresses and you only want to start tasks there that make use of public addresses.
 
-* Some nodes in your cluster have special hardware, such as very fast SSDs or GPUs, that you want to reserve for tasks that need this hardware.
+* Some nodes in your cluster have special hardware, such as very fast SSDs or GPUs, that you want to reserve for tasks that need this hardware. 
 
 See the detailed docs on
 <a href="{{ site.baseurl }}/docs/constraints.html">constraints</a>.
