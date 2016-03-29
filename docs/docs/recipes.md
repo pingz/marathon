@@ -193,15 +193,18 @@ However, there are times when you want to separate some machines from the common
 
 * Some nodes in your cluster have publicly reachable network addresses and you only want to start tasks there that make use of public addresses.
 
-* Some nodes in your cluster have special hardware, such as very fast SSDs or GPUs, that you want to reserve for tasks that need this hardware.
+* Some nodes in your cluster have special hardware, such as very fast SSDs or GPUs, that you want to reserve for tasks that need this hardware. 
+
+See the detailed docs on
+<a href="{{ site.baseurl }}/docs/constraints.html">constraints</a>.
   
 ### Using roles
 
 You can configure some of your Mesos agents to only offer their resources to a specific Mesos role. Only Mesos frameworks (such as Marathon) that are configured for this specific Mesos role will get offers for these resources. In this way, you can prevent accidental usage of these resources by other Mesos frameworks.
 
-1. Configure Marathon: `--mesos_role yourrole`
+1. Configure Marathon: `--mesos_role yourrole`.
 
-2. Configure the Mesos master: `--roles=<...other roles...>,yourrole`
+2. Configure the Mesos master: `--roles=<...other roles...>,yourrole`.
 
 3. Configuring the Mesos agents whose resource offers you want to restrict. Either use the  `--default_role yourrole` flag to assign all that agent's resources to your role or use the `--resources` flag to assign individual resources to that role (such as a certain port range). See [the Mesos command line documentation](http://mesos.apache.org/documentation/latest/configuration/) for details.
 
@@ -214,7 +217,7 @@ To ensure that only special tasks are run on nodes you specify, you can use a se
 You can also configure Marathon to ignore your special roles for apps by default, then explicitly configure the exceptions:
 
 1. Configure Marathon to ignore the special resources by default: `--default_accepted_resource_roles '*'` (make sure
-that you quote the "*" correctly)
+that you quote the "*" correctly).
 
 2.  Configure an app to run on top of resources of your special role:
 
