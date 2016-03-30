@@ -68,6 +68,10 @@ class DeploymentsResource @Inject() (
     currentStepInfo: DeploymentStepInfo): JsObject = {
 
     val steps = deployment.steps.map(step => step.actions.map(actionToMap)).map(Json.toJson(_))
+    val readinessResults = currentStepInfo.readinessChecksByApp.map{
+      case (id, results) => Json.obj(id.toString -> Json.obj("readinessCheckResults" -> Json.toJson(results)))
+    }
+
     Json.obj(
       "id" -> deployment.id,
       "version" -> deployment.version,
@@ -75,6 +79,10 @@ class DeploymentsResource @Inject() (
       "steps" -> steps,
       "currentActions" -> currentStepInfo.step.actions.map(actionToMap),
       "currentStep" -> currentStepInfo.nr,
+      "currentStepInfo" -> Json.obj(
+        "stepNumber" -> currentStepInfo.nr,
+        "apps" -> readinessResults
+      ),
       "totalSteps" -> deployment.steps.size
     )
   }
