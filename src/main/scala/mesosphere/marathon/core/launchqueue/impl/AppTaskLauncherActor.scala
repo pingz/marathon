@@ -147,7 +147,7 @@ private class AppTaskLauncherActor(
     ).reduce(_.orElse[Any, Unit](_))
   }
 
-  private[this] def waitingForInFlight: Receive = LoggingReceive.withLabel("waitingForInFlight") {
+  private[this] def stopping: Receive = LoggingReceive.withLabel("stopping") {
     Seq(
       receiveStop,
       receiveWaitingForInFlight,
@@ -160,7 +160,9 @@ private class AppTaskLauncherActor(
       receiveTaskLaunchNotification(notification)
       waitForInFlightIfNecessary()
 
-    case "waitingForInFlight" => sender() ! "waitingForInFlight" // for testing
+    case AppTaskLauncherActor.Stop => // ignore, already stopping
+
+    case "waitingForInFlight"      => sender() ! "waitingForInFlight" // for testing
   }
 
   private[this] def receiveUnknown: Receive = {
@@ -170,7 +172,13 @@ private class AppTaskLauncherActor(
   }
 
   private[this] def receiveStop: Receive = {
-    case AppTaskLauncherActor.Stop => waitForInFlightIfNecessary()
+    case AppTaskLauncherActor.Stop =>
+      if (inFlightTaskOperations.nonEmpty) {
+        // try to stop gracefully but also schedule timeout
+        import context.dispatcher
+        context.system.scheduler.scheduleOnce(config.taskOpNotificationTimeout().milliseconds, self, PoisonPill)
+      }
+      waitForInFlightIfNecessary()
   }
 
   private[this] def waitForInFlightIfNecessary(): Unit = {
@@ -178,8 +186,12 @@ private class AppTaskLauncherActor(
       context.stop(self)
     }
     else {
-      log.info(s"Stopping but still waiting for ${inFlightTaskOperations.size} in-flight messages")
-      context.become(waitingForInFlight)
+      val taskIds = inFlightTaskOperations.keys.take(3).mkString(", ")
+      log.info(
+        s"Stopping but still waiting for ${inFlightTaskOperations.size} in-flight messages, " +
+          s"first three task ids: $taskIds"
+      )
+      context.become(stopping)
     }
   }
 
